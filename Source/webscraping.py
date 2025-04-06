@@ -107,6 +107,11 @@ def main():
     paso1_ordenar_elementos(driver)
     paso2_obtener_datos(driver)
 
+    paginas = paso2_obtener_datos(driver)
+    for url in paginas:
+        datos = paso3_extraer_detalles(url)
+        print(datos)
+
     # Finalización =====================================================================================================
     # solo activaremos esta opción si queremos que el webdriver termine. Para efectos de la
     # prac lo dejamos activado
