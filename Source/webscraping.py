@@ -40,6 +40,61 @@ def paso2_obtener_datos(driver):
 
     return paginas
 
+def paso3_extraer_detalles(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Error al acceder a {url}")
+        return None
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # variables alineadas con la creación de la DB
+    datos = {
+        "estado_clinico": None,
+        "tipo_celula": None,
+        "n_participantes": None,
+        "fecha_inicio": None,
+        "fecha_conclusion": None,
+    }
+
+    contenedor = soup.find("div", class_="l-box")
+    if not contenedor:
+        return None
+
+    try:
+        estado_clinico = contenedor.find(string="Clinical status").find_next("td").get_text(strip=True)
+        datos["estado_clinico"] = estado_clinico
+    except AttributeError:
+        pass
+
+    try:
+        tipo_celula = contenedor.find(string="Which differentiated cell type is used").find_next("td").find("table", class_="pure-table pure-table-striped model-table").find(string="Label").find_next("td").get_text(strip=True)
+        datos["tipo_celula"] = tipo_celula
+    except AttributeError:
+        pass
+
+    try:
+        n_participantes = contenedor.find(string="Estimated number of participants").find_next("td").get_text(strip=True)
+        datos["n_participantes"] = int(n_participantes) if n_participantes.isdigit() else None
+    except AttributeError:
+        pass
+
+    try:
+        fecha_inicio = contenedor.find(string="Start date (estimated)").find_next("td").get_text(strip=True)
+        datos["fecha_inicio"] = fecha_inicio
+    except AttributeError:
+        pass
+
+    try:
+        fecha_conclusion = contenedor.find(string="End date (estimated)").find_next("td").get_text(strip=True)
+        datos["fecha_conclusion"] = fecha_conclusion
+    except AttributeError:
+        pass
+
+    return datos
+
+
+
 def main():
     # Configuración del Webdriver ======================================================================================
     chrome_options = Options()
