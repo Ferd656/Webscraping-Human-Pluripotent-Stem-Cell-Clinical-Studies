@@ -4,10 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92886e29-4df3-4df3-8035-63ab58f22b8f" name="Changes" comment="estructura del repositorio">
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="92886e29-4df3-4df3-8035-63ab58f22b8f" name="Changes" comment="función de ordenación">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/M2.851_20242_Practica1.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Source/M2.851_20242_Practica1.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/webscraping.py" beforeDir="false" afterPath="$PROJECT_DIR$/Source/webscraping.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -120,7 +118,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743909731130</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="función de ordenación">
+      <option name="closed" value="true" />
+      <created>1743912519259</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1743912519259</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -148,6 +154,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="estructura del repositorio" />
-    <option name="LAST_COMMIT_MESSAGE" value="estructura del repositorio" />
+    <MESSAGE value="función de ordenación" />
+    <option name="LAST_COMMIT_MESSAGE" value="función de ordenación" />
   </component>
 </project>

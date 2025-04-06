@@ -1,11 +1,13 @@
 import time
+import requests
+from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def ordenar_elementos(driver):
+def paso1_ordenar_elementos(driver):
     # Primera función, ordenaremos los casos clínicos de más recientes a más antiguos
     # para ello, usamos selenium.
     # Presionaremos el botón hasta que cambie la clase a 'ordenado'.
@@ -24,6 +26,20 @@ def ordenar_elementos(driver):
             return True
     return False
 
+def paso2_obtener_datos(driver):
+    #Obtiene los títulos y las rutas/referencias web para cada caso clínico
+    titulos = []
+    paginas = []
+    a_elements = driver.find_elements(By.CSS_SELECTOR, 'ol.list li div h3 a')
+
+    for a_element in a_elements:
+        titulos.append(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
+        print(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
+        paginas.append(a_element.get_attribute("href"))
+        print(a_element.get_attribute("href"))
+
+    return paginas
+
 def main():
     # Configuración del Webdriver ======================================================================================
     chrome_options = Options()
@@ -33,7 +49,8 @@ def main():
     driver.get("https://hpscreg.eu/browse/trials")
 
     # Ejecución del proceso webscraping ================================================================================
-    ordenar_elementos(driver)
+    paso1_ordenar_elementos(driver)
+    paso2_obtener_datos(driver)
 
     # Finalización =====================================================================================================
     # solo activaremos esta opción si queremos que el webdriver termine. Para efectos de la
