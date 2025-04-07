@@ -1,0 +1,11 @@
+id|url|estudio_clinico|fase_estudio_clinico|tipo_celula|pais|n_participantes|fecha_inicio|fecha_conclusion
+1|https://hpscreg.eu/browse/trial/202|Stereotactic Intracerebral Injection of IPSC-DAPs in Patients with Parkinson's Disease|Phase 1|dopaminergic neuron|China|12|2025-05-15|2026-09-30
+2|https://hpscreg.eu/browse/trial/206|A Study to Evaluate the Safety of a Delivery Device for Administering LCTOPC1 in Participants with Spinal Cord Injury (DOSED)|Phase 1|oligodendrocyte precursor cell|United States|10|2025-04-30|2037-04-27
+3|https://hpscreg.eu/browse/trial/199|A Study to Investigate the Safety of OpCT-001 in Adults Who Have Primary Photoreceptor Disease (CLARICO) (CLARICO)|Phases 1/2|photoreceptor cell|United States|54|2025-03-10|2030-10-31
+4|https://hpscreg.eu/browse/trial/201|A Trial to Evaluate the Safety, Tolerability and Preliminary Efficacy of NCR101 in the Treatment of Subjects With Interstitial Lung Disease|Phases 1/2|mesenchymal stem cell|China|30|2025-03-01|2028-09-01
+5|https://hpscreg.eu/browse/trial/200|Induced Pluripotent Stem Cell Derived Exosomes Nasal Drops for the Treatment of Stable Vitiligo|Early Phase 1||China|29|2025-02-05|2026-11-17
+6|https://hpscreg.eu/browse/trial/205|The Safety and Efficacy of VGO-Cs01p in Patients With CD7-positive Relapsed/​Refractory Acute T-lymphoblastic Leukemia|Early Phase 1|natural killer cell||9|2025-02-01|2026-10-31
+7|https://hpscreg.eu/browse/trial/203|Exploratory Study on the Treatment of Moderate to Severe Acute Respiratory Distress Syndrome in Children with Exosomes Derived from Induced Pluripotent Stem Cells (iPSC-Exo)|Phase 2||China|28|2025-01-01|2026-12-31
+8|https://hpscreg.eu/browse/trial/204|iPSC-Derived CTL Therapy for Cervical Cancer: Phase I clinical trial (iPSC-Derived CTL Therapy for Cervical Cancer: Phase I clini|Phase 1|cytotoxic T cell|Japan|12|2024-12-27|2028-12-31
+9|https://hpscreg.eu/browse/trial/197|An open-label, single-center, first-in-human study to evaluate the safety, tolerability and activity of autologous human induced pluripotent stem cell derived endothelial cells (hiPSC-ECs) in patients with peripheral artery disease|Not applicable|endothelial cell|South Korea|10|2024-12-20|2028-08-13
+10|https://hpscreg.eu/browse/trial/191|Ph I Trial of Cell Based Therapy for DMD|Phase 1|||8|2024-12-16|2027-03-03

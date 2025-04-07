@@ -1,19 +1,43 @@
 import sqlite3
 
-def crear_base_datos(nombre_db="ensayos_clinicos.db"):
-    conn = sqlite3.connect(nombre_db)
+def inicializar_repositorio(db_path="ensayos_clinicos.db", repositorio = "ensayos_PSC"):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    if repositorio == "ensayos_PSC":
+        cursor.execute(
+            '''CREATE TABLE IF NOT EXISTS ensayos_PSC (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                url VARCHAR(80),
+                estudio_clinico TEXT,
+                fase_estudio_clinico VARCHAR(32),
+                tipo_celula VARCHAR(32),
+                pais VARCHAR(16),
+                n_participantes INTEGER,
+                fecha_inicio DATE,
+                fecha_conclusion DATE
+            )
+        ''')
+    else:
+        #Para el caso en que haya que inicializar más repositositorios a través del curso
+        print(f"Falta definir la sentencia SQL para inicializar el repositorio '{repositorio}'.")
+    conn.commit()
+    conn.close()
+
+def agregar_registro_psc(data, db_path):
+    inicializar_repositorio(db_path = db_path)
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ensayos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            estado_clinico TEXT,
-            tipo_celula TEXT,
-            n_participantes INTEGER,
-            fecha_inicio TEXT,
-            fecha_conclusion TEXT
-        )
-    ''')
+    # Primero revisamos si ya el registro fue incluido con anterioridad
+    cursor.execute("SELECT url FROM ensayos_PSC WHERE url = ? LIMIT 1", (data["url"],))
+    ya_existe = cursor.fetchone() is not None
 
-    conn.commit()
+    if not ya_existe:
+        columnas = ', '.join(data.keys())
+        variables = ', '.join(['?'] * len(data))
+        sql = f'INSERT INTO ensayos_PSC ({columnas}) VALUES ({variables})'
+        cursor.execute(sql, tuple(data.values()))
+        conn.commit()
+        print("Nuevo registro añadido a 'ensayos_PSC'")
+
     conn.close()

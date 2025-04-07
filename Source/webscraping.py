@@ -1,18 +1,26 @@
 import time
 import requests
+import base_de_datos
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
+
+# Variables globales *********************************************
+
+URL = "https://hpscreg.eu/browse/trials"
+DATABASE = "../Dataset/ensayos_clinicos.db"
+
+# ****************************************************************
 
 def paso1_ordenar_elementos(driver):
     # Primera función, ordenaremos los casos clínicos de más recientes a más antiguos
     # para ello, usamos selenium.
     # Presionaremos el botón hasta que cambie la clase a 'ordenado'.
     buttons = WebDriverWait(driver, 10).until(
-        EC.presence_of_all_elements_located((By.TAG_NAME, "button"))
+        ec.presence_of_all_elements_located((By.TAG_NAME, "button"))
     )
     for btn in buttons:
         text = btn.text.strip()
@@ -34,13 +42,13 @@ def paso2_obtener_datos(driver):
 
     for a_element in a_elements:
         titulos.append(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
-        print(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
+        #print(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
         paginas.append(a_element.get_attribute("href"))
-        print(a_element.get_attribute("href"))
+        #print(a_element.get_attribute("href"))
 
     return paginas
 
-def paso3_extraer_detalles(url):
+def extraer_detalles(url):
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Error al acceder a {url}")
@@ -50,8 +58,11 @@ def paso3_extraer_detalles(url):
 
     # variables alineadas con la creación de la DB
     datos = {
-        "estado_clinico": None,
+        "url": None,
+        "estudio_clinico": None,
+        "fase_estudio_clinico": None,
         "tipo_celula": None,
+        "pais": None,
         "n_participantes": None,
         "fecha_inicio": None,
         "fecha_conclusion": None,
@@ -61,39 +72,67 @@ def paso3_extraer_detalles(url):
     if not contenedor:
         return None
 
+    datos["url"] = url
+
     try:
-        estado_clinico = contenedor.find(string="Clinical status").find_next("td").get_text(strip=True)
-        datos["estado_clinico"] = estado_clinico
+        datos["estudio_clinico"] = contenedor.find(class_="multi-line").get_text(strip=True)
     except AttributeError:
         pass
 
     try:
-        tipo_celula = contenedor.find(string="Which differentiated cell type is used").find_next("td").find("table", class_="pure-table pure-table-striped model-table").find(string="Label").find_next("td").get_text(strip=True)
-        datos["tipo_celula"] = tipo_celula
+        datos["fase_estudio_clinico"] = contenedor.find(
+            string="Clinical trials phase"
+        ).find_next("td").get_text(strip=True)
     except AttributeError:
         pass
 
     try:
-        n_participantes = contenedor.find(string="Estimated number of participants").find_next("td").get_text(strip=True)
+        datos["tipo_celula"] = contenedor.find(
+            string="Which differentiated cell type is used"
+        ).find_next("td").find(
+            "table",class_="pure-table pure-table-striped model-table"
+        ).find(string="Label").find_next("td").get_text(strip=True)
+    except AttributeError:
+        pass
+
+    try:
+        datos["pais"] = contenedor.find(
+            string="Public contact"
+        ).find_next("td").find(
+            "table",class_="pure-table pure-table-striped model-table"
+        ).find(string="Country").find_next("td").get_text(strip=True)
+    except AttributeError:
+        pass
+
+    try:
+        n_participantes = contenedor.find(
+            string="Estimated number of participants"
+        ).find_next("td").get_text(strip=True)
         datos["n_participantes"] = int(n_participantes) if n_participantes.isdigit() else None
     except AttributeError:
         pass
 
     try:
-        fecha_inicio = contenedor.find(string="Start date (estimated)").find_next("td").get_text(strip=True)
-        datos["fecha_inicio"] = fecha_inicio
+        datos["fecha_inicio"] = contenedor.find(string="Start date (estimated)").find_next("td").get_text(strip=True)
     except AttributeError:
         pass
 
     try:
-        fecha_conclusion = contenedor.find(string="End date (estimated)").find_next("td").get_text(strip=True)
-        datos["fecha_conclusion"] = fecha_conclusion
+        datos["fecha_conclusion"] = contenedor.find(string="End date (estimated)").find_next("td").get_text(strip=True)
     except AttributeError:
         pass
 
     return datos
 
-
+def paso3_almacenar_data(urls, db_path, repositorio = "ensayos_PSC"):
+    # Recibe la lista de urls y almacena la data en una base de datos y estructura dada
+    if repositorio == "ensayos_PSC":
+        for url in urls:
+            data = extraer_detalles(url)
+            base_de_datos.agregar_registro_psc(data, db_path)
+        print("Base de datos actualizada!")
+    else:
+        print(f"Falta definir un procedimiento para el repositorio '{repositorio}'.")
 
 def main():
     # Configuración del Webdriver ======================================================================================
@@ -101,16 +140,12 @@ def main():
     chrome_options.add_experimental_option("detach", True)
     driver = webdriver.Chrome(options=chrome_options)
 
-    driver.get("https://hpscreg.eu/browse/trials")
+    driver.get(URL)
 
     # Ejecución del proceso webscraping ================================================================================
     paso1_ordenar_elementos(driver)
-    paso2_obtener_datos(driver)
-
-    paginas = paso2_obtener_datos(driver)
-    for url in paginas:
-        datos = paso3_extraer_detalles(url)
-        print(datos)
+    urls_paso2 = paso2_obtener_datos(driver)
+    paso3_almacenar_data(urls_paso2, db_path=DATABASE)
 
     # Finalización =====================================================================================================
     # solo activaremos esta opción si queremos que el webdriver termine. Para efectos de la
