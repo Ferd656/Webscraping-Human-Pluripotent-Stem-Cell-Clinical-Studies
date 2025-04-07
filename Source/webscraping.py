@@ -38,13 +38,32 @@ def paso2_obtener_datos(driver):
     #Obtiene los títulos y las rutas/referencias web para cada caso clínico
     titulos = []
     paginas = []
-    a_elements = driver.find_elements(By.CSS_SELECTOR, 'ol.list li div h3 a')
 
-    for a_element in a_elements:
-        titulos.append(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
-        #print(a_element.find_elements(By.CSS_SELECTOR, 'abbr')[0].text.strip())
-        paginas.append(a_element.get_attribute("href"))
-        #print(a_element.get_attribute("href"))
+    # Espera a que se cargue el paginador
+    WebDriverWait(driver, 10).until(
+        ec.presence_of_all_elements_located((By.CSS_SELECTOR, 'ul.pagination li a'))
+    )
+
+    # Detectar número total de páginas (los botones numéricos del paginador)
+    paginador = driver.find_elements(By.CSS_SELECTOR, 'ul.pagination li a')
+    numeros_paginas = [int(a.text) for a in paginador if a.text.isdigit()]
+    total_paginas = max(numeros_paginas)
+
+    for i in range(1, total_paginas + 1):
+        WebDriverWait(driver, 10).until(
+            ec.presence_of_all_elements_located((By.CSS_SELECTOR, 'ol.list li div h3 a'))
+        )
+
+        a_elements = driver.find_elements(By.CSS_SELECTOR, 'ol.list li div h3 a')
+        for a_element in a_elements:
+            abbrs = a_element.find_elements(By.CSS_SELECTOR, 'abbr')
+            titulos.append(abbrs[0].text.strip() if abbrs else "Sin título")
+            paginas.append(a_element.get_attribute("href"))
+
+        if i < total_paginas:
+            next_page_button = driver.find_element(By.LINK_TEXT, str(i + 1))
+            next_page_button.click()
+            time.sleep(2)
 
     return paginas
 
