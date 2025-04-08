@@ -69,3 +69,7 @@ Esta es una función <i>void</i>, es decir, que no devuelve ningún valor.
 <h3>▶️Modo de uso del programa</h3>
 
 Para ejecutar el programa solamente se debe correr el <i>script</i> de webscraping.py, ya sea mediante el editor de código de preferencia o mediante el comando `python webscraping.py`.
+
+<h2>Resultados:</h2>
+
+Puede consultar un ejemplo de los datos resultantes de la ejecución de este programa mediante el siguiente <a href="https://doi.org/10.5281/zenodo.15170761" target="_blank">enlace Zenodo</a>.
