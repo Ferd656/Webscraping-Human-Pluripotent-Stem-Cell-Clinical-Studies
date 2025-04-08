@@ -51,7 +51,7 @@ Esta es una función <i>void</i>, es decir, que no devuelve ningún valor.
 </div><br>
 
 <h3>▶️base_de_datos.py</h3>
-<p>Este fichero contiene funciones específicas para la gestión y el almacenamiento de la data en la base de datos "ensayos_clinicos.db". Utiliza la librería SQLite. . A continuación se describe las funciones que este fichero contiene:</p>
+<p>Este fichero contiene funciones específicas para la gestión y el almacenamiento de la data en la base de datos "ensayos_clinicos.db". Utiliza la librería SQLite. A continuación se describe las funciones que este fichero contiene:</p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;<b>• inicializar_repositorio</b><br>
 <div style="margin-left: 40px;">Esta función recibe como parámetros opcionales la ruta de la base de datos y el nombre de la tabla en donde se almacenará la información.<br>Está diseñada para construir adecuadamente la tabla recibida como parámetro (si esta no existe previamente en la base de datos) siguiendo un esquema dado.<br><br>
@@ -59,17 +59,17 @@ Esta es una función <i>void</i>, es decir, que no devuelve ningún valor.
 </div><br>
 
 &nbsp;&nbsp;&nbsp;&nbsp;<b>• agregar_registro_psc</b><br>
-<div style="margin-left: 40px;">Esta función recibe como parámetros un objeto diccionario la ruta de la base de datos que contiene la tabla objetivo.<br>Está diseñada específicamente para insertar un registro a la tabla de ensayos clínicos llamada "ensayos_PSC", si el registro no existe preciamente.<br><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetros un objeto diccionario la ruta de la base de datos que contiene la tabla objetivo.<br>Está diseñada específicamente para insertar un registro a la tabla de ensayos clínicos llamada "ensayos_PSC", si el registro no existe previamente.<br><br>
 Esta es una función <i>void</i>, es decir, que no devuelve ningún valor. 
 </div><br>
 
 <h3>▶️explorar.py</h3>
-<p>Este fichero no contiene funciones. Está diseñado para que, al ser ejecutado, devuelva un breve resumen descriptivo de los datos almacenados en "ensayos_PSC", haciendo uso de la librería <i>Pandas</i>.</p>
+<p>Este fichero no contiene funciones. Está diseñado para que, al ser ejecutado, devuelva un breve resumen descriptivo de los datos almacenados en "ensayos_PSC", haciendo uso de las librerías <i>Pandas</i> y <i>SQLite</i>.</p>
 
 <h3>▶️Modo de uso del programa</h3>
 
-Para ejecutar el programa solamente se debe correr el <i>script</i> de webscraping.py, ya sea mediante el editor de código de preferencia o mediante el comando `python webscraping.py`.
+Para ejecutar el programa solamente se debe correr el <i>script</i> llamado webscraping.py, ya sea mediante el editor de código de preferencia o mediante el comando `python webscraping.py`.
 
 <h2>Resultados:</h2>
 
-Puede consultar un ejemplo de los datos resultantes de la ejecución de este programa mediante el siguiente <a href="https://doi.org/10.5281/zenodo.15170761" target="_blank">enlace Zenodo</a>.
+Puede consultar un ejemplo de los datos resultantes tras una ejecución de este programa mediante el siguiente <a href="https://doi.org/10.5281/zenodo.15170761" target="_blank">enlace Zenodo</a>.
