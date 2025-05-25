@@ -16,9 +16,9 @@ def inicializar_repositorio(db_path="ensayos_clinicos.db", repositorio = "ensayo
                 tipo_celula VARCHAR(32),
                 pais VARCHAR(16),
                 n_participantes INTEGER,
-                edad_min_participante REAL,
-                edad_max_participante REAL,
-                genero_participante SMALLINT,
+                edad_min_participante INTEGER,
+                edad_max_participante INTEGER,
+                genero_participante VARCHAR(32),
                 n_patrocinadores INTEGER,
                 fecha_inicio DATE,
                 fecha_conclusion DATE

@@ -69,7 +69,7 @@ def paso2_obtener_datos(driver):
     return paginas
 
 
-# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences,PyTypeChecker
 def ictrp_url_info(ictrp_url, chrome_options, timeout=5):
     #Obtiene la data de ictrp
     options = chrome_options
