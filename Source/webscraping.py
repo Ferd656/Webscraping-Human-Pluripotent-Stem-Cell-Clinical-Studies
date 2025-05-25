@@ -1,3 +1,4 @@
+import re
 import time
 import requests
 import base_de_datos
@@ -67,7 +68,77 @@ def paso2_obtener_datos(driver):
 
     return paginas
 
-def extraer_detalles(url):
+
+# noinspection PyUnresolvedReferences
+def ictrp_url_info(ictrp_url, chrome_options, timeout=5):
+    #Obtiene la data de ictrp
+    options = chrome_options
+    # Que no se nos abran las ventanas
+    options.add_argument("--headless")
+    driver = webdriver.Chrome(options=options)
+    driver.get(ictrp_url)
+    wait = WebDriverWait(driver, timeout)
+    # Diccionario que contendrá las nuevas variables a recolectar:
+    datos = {
+        "edad_min": None,
+        "edad_max": None,
+        "genero": None,
+        "tipo_estudio": None,
+        "pais": None,
+        "condiciones": None,
+        "n_patrocinadores": None
+    }
+    # Subfunción para recopilar las variables:
+    def get_text_by_id(id_, detalle=""):
+        try:
+            # Esperamos unos segundos a que cargue, especificado en el parámetro 'timeout'
+            return wait.until(ec.presence_of_element_located((By.ID, id_)))
+        except Exception as e:
+            if detalle == "":
+                msg = str(e)
+            else:
+                msg = "Sin data para para: " + detalle
+            print(msg)
+            return None
+    # ----------------------------------------
+    # Recopila la información de cada variable:
+    edad_min = get_text_by_id("DataList6_ctl01_Label8", "edad mínima de los participantes")
+    edad_max = get_text_by_id("DataList6_ctl01_Label11", "edad máxima de los participantes")
+    genero = get_text_by_id("DataList6_ctl01_Label12", "género de los participantes")
+    tipo_estudio = get_text_by_id("DataList3_ctl01_Study_typeLabel", "tipo de estudio")
+    pais = get_text_by_id("DataList2_ctl01_Country_Label", "país")
+    condiciones = get_text_by_id("DataList8_ctl01_Condition_FreeTextLabel", "condiciones de estudio")
+    patrocinadores = get_text_by_id("DataList18", "patrocinadores")
+    # ----------------------------------------
+    # Almacena las variables en el diccionario:
+    datos['edad_min'] = edad_min.text.strip() if edad_min is not None else None
+    datos['edad_max'] = edad_max.text.strip() if edad_max is not None else None
+    datos['genero'] = genero.text.strip() if genero is not None else None
+    datos['tipo_estudio'] = tipo_estudio.text.strip() if tipo_estudio is not None else None
+    datos['pais'] = pais.text.strip() if pais is not None else None
+    if condiciones is not None:
+        datos['condiciones'] = "|".join(
+            line.strip() for
+            line in
+            condiciones.get_attribute("innerHTML").split("<br>") if
+            line.strip()
+        ).replace(";", "|")
+        # Sin vacíos al final
+        datos['condiciones'] = datos['condiciones'][:-1] if datos['condiciones'].endswith("|") else datos['condiciones']
+    if patrocinadores is not None:
+        rows = patrocinadores.find_elements(By.TAG_NAME, "tr")
+        datos['n_patrocinadores'] = max(0, len(rows) - 1) #sin números negativos
+    else:
+        datos['n_patrocinadores'] = 0
+    # ----------------------------------------
+    # Finalizamos el driver para que no queden tropecientos objetos abiertos sin usar
+    driver.quit()
+    # ----------------------------------------
+    # Devuelve el diccionario:
+    return datos
+
+# noinspection PyTypeChecker,PyUnresolvedReferences
+def extraer_detalles(url, chrome_options):
     response = requests.get(url)
     if response.status_code != 200:
         print(f"Error al acceder a {url}")
@@ -79,19 +150,53 @@ def extraer_detalles(url):
     datos = {
         "url": None,
         "estudio_clinico": None,
+        "tipo_estudio": None,
         "fase_estudio_clinico": None,
+        "condicion_primaria_estudio": None,
+        "condicion_secundaria_estudio": None,
         "tipo_celula": None,
         "pais": None,
         "n_participantes": None,
+        "edad_min_participante": None,
+        "edad_max_participante": None,
+        "genero_participante": None,
+        "n_patrocinadores": None,
         "fecha_inicio": None,
-        "fecha_conclusion": None,
+        "fecha_conclusion": None
     }
-
     contenedor = soup.find("div", class_="l-box")
     if not contenedor:
         return None
 
     datos["url"] = url
+
+    try:
+        ictrp_tag = contenedor.find(
+            string="ICTRP weblink"
+        )
+        if ictrp_tag is None:
+            print("No se encontró la referencia 'ICTRP'")
+        else:
+            ictrp_url = ictrp_tag.find_next("td").find("a")['href']
+            print(ictrp_url)
+            datos_ictrp = ictrp_url_info(ictrp_url, chrome_options)
+            if datos_ictrp["condiciones"] is not None:
+                datos["condicion_primaria_estudio"] = datos_ictrp["condiciones"].split("|")[0].strip()
+                if len(datos_ictrp["condiciones"].split("|")) > 1:
+                    datos["condicion_secundaria_estudio"] = datos_ictrp["condiciones"].split("|")[-1].strip()
+            # utilizamos expresiones regulares para extraer únicamente los números
+            edad_min = "".join(re.findall(r"\d", datos_ictrp["edad_min"]))
+            edad_max = "".join(re.findall(r"\d", datos_ictrp["edad_max"]))
+            datos["edad_min_participante"] = edad_min if edad_min else None
+            datos["edad_max_participante"] = edad_max if edad_max else None
+            # -----------------------------------------------------------------------
+            datos["genero_participante"] = datos_ictrp["genero"]
+            datos["pais"] = datos_ictrp["pais"]
+            datos["tipo_estudio"] = datos_ictrp["tipo_estudio"]
+            datos["n_patrocinadores"] = datos_ictrp["n_patrocinadores"]
+    except Exception as e:
+        print(str(e))
+        pass
 
     try:
         datos["estudio_clinico"] = contenedor.find(class_="multi-line").get_text(strip=True)
@@ -114,14 +219,15 @@ def extraer_detalles(url):
     except AttributeError:
         pass
 
-    try:
-        datos["pais"] = contenedor.find(
-            string="Public contact"
-        ).find_next("td").find(
-            "table",class_="pure-table pure-table-striped model-table"
-        ).find(string="Country").find_next("td").get_text(strip=True)
-    except AttributeError:
-        pass
+    if datos["pais"] is None:
+        try:
+            datos["pais"] = contenedor.find(
+                string="Public contact"
+            ).find_next("td").find(
+                "table",class_="pure-table pure-table-striped model-table"
+            ).find(string="Country").find_next("td").get_text(strip=True)
+        except AttributeError:
+            pass
 
     try:
         n_participantes = contenedor.find(
@@ -143,11 +249,11 @@ def extraer_detalles(url):
 
     return datos
 
-def paso3_almacenar_data(urls, db_path, repositorio = "ensayos_PSC"):
+def paso3_almacenar_data(urls, db_path, chrome_options, repositorio = "ensayos_PSC"):
     # Recibe la lista de urls y almacena la data en una base de datos y estructura dada
     if repositorio == "ensayos_PSC":
         for url in urls:
-            data = extraer_detalles(url)
+            data = extraer_detalles(url, chrome_options)
             base_de_datos.agregar_registro_psc(data, db_path)
         print("Base de datos actualizada!")
     else:
@@ -164,15 +270,10 @@ def main():
     # Ejecución del proceso webscraping ================================================================================
     paso1_ordenar_elementos(driver)
     urls_paso2 = paso2_obtener_datos(driver)
-    paso3_almacenar_data(urls_paso2, db_path=DATABASE)
-
+    driver.quit() # Cerramos el driver
+    paso3_almacenar_data(urls_paso2, db_path=DATABASE, chrome_options=chrome_options)
     # Finalización =====================================================================================================
-    # solo activaremos esta opción si queremos que el webdriver termine. Para efectos de la
-    # prac lo dejamos activado
-    #driver.quit()
+    print("Proceso finalizado!")
 
 if __name__ == "__main__":
     main()
-
-
-

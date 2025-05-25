@@ -9,10 +9,17 @@ def inicializar_repositorio(db_path="ensayos_clinicos.db", repositorio = "ensayo
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 url VARCHAR(80),
                 estudio_clinico TEXT,
+                tipo_estudio VARCHAR(16),
                 fase_estudio_clinico VARCHAR(32),
+                condicion_primaria_estudio VARCHAR(32),
+                condicion_secundaria_estudio VARCHAR(32),
                 tipo_celula VARCHAR(32),
                 pais VARCHAR(16),
                 n_participantes INTEGER,
+                edad_min_participante REAL,
+                edad_max_participante REAL,
+                genero_participante SMALLINT,
+                n_patrocinadores INTEGER,
                 fecha_inicio DATE,
                 fecha_conclusion DATE
             )
