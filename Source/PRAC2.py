@@ -1,5 +1,12 @@
 import pandas as pd
 import base_de_datos
+
+conn = base_de_datos.sqlite3.connect("../Dataset/ensayos_clinicos.db")
+df = pd.read_sql_query("SELECT * FROM ensayos_PSC", conn) # <--- df = Data para trabajar
+conn.close()
+
+df.info()
+
 # +---------------------+
 # | Limpieza de datos   |
 # +---------------------+
