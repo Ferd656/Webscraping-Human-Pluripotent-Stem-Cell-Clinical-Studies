@@ -48,3 +48,18 @@ def agregar_registro_psc(data, db_path):
         print("Nuevo registro añadido a 'ensayos_PSC'")
 
     conn.close()
+
+def schema_to_pandas(conn, repositorio = "ensayos_PSC"): #Función que devuelve los tipos de dato en formato Pandas
+    datatypes = dict()
+    cursor = conn.cursor()
+    cursor.execute(f"PRAGMA table_info({repositorio})")
+    schema_info = cursor.fetchall()
+
+    for i in schema_info:
+        datatypes[i[1]] = "Int64" if "int" in i[2].lower() else (
+            "Float64" if "double" in i[2].lower() or "real" in i[2].lower() or "float" in i[2].lower() else (
+                "datetime64[s]" if "date" in i[2].lower() else "string"
+            )
+        )
+
+    return datatypes
