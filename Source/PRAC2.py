@@ -437,11 +437,8 @@ for colnm in categoricas:
 df_clean["Target"] = (df_clean["fecha_conclusion"] - df_clean["fecha_inicio"]).dt.days
 ## 3.1.2 Para modelar usamos únicamente los datos con registro empírico de fecha_conclusion
 df_training = df_clean[(df_clean['Target'].notnull()) & (df_clean['fecha_conclusion'] < '2025-01-01')]
-## 3.1.3 Para poner a prueba los resultados del modelo usamos un subconjunto con una fecha de conclusión estimada
-# bajo el supuesto de que dicha fecha de conslusión no sufrirá modificaciones a lo largo del tiempo
-df_testing = df_clean[(df_clean['Target'].notnull()) & (df_clean['fecha_conclusion'] >= '2025-01-01')]
-## 3.1.4 Un último subconjunto, que no tiene una fecha de conclusión definida, será utilizado como ejemplo de la
-# aplicación del modelo para la estimación de la fecha
+## 3.1.3 Un segundo subconjunto, que no tiene una fecha de conclusión definida, que podría ser utilizado
+# como ejemplo de la aplicación del modelo para la estimación de la fecha
 df_application = df_clean[df_clean['Target'].isnull()]
 # 3.2 Visualizar las variables explicativas en función del objetivo  ----------------------------------------------------
 ## 3.2.1 Variables numércicas
