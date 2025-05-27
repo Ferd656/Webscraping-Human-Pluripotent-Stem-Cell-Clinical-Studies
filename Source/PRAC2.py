@@ -71,7 +71,7 @@ def analisis_exploratorio(datos):
         axes[i].set_title(f"{variable}")
         axes[i].set_xlabel(variable)
         axes[i].set_ylabel("Conteo")
-        axes[i].tick_params(axis='x', rotation=45)
+        axes[i].tick_params(axis='x', rotation=70, labelsize=8)
         n_distinct = datos[variable].nunique(dropna=False)
         axes[i].text(
             0.95, 0.95,  # Position (relative to axes)
@@ -127,12 +127,12 @@ def see_categorical_vars(_categoricas, _df, _n_cols = 8):
         axes[row, col].set_title(f"{variable}")
         axes[row, col].set_xlabel('')
         axes[row, col].set_ylabel('')
-        axes[row, col].tick_params(axis='x', rotation=45)
+        axes[row, col].tick_params(axis='x', rotation=70, labelsize=8)
         sns.boxplot(x=variable, y="Target", data=_df, ax=axes[row, col+1])
         axes[row, col+1].set_title(f"{variable}")
         axes[row, col+1].set_xlabel('')
         axes[row, col+1].set_ylabel('')
-        axes[row, col+1].tick_params(axis='x', rotation=45)
+        axes[row, col+1].tick_params(axis='x', rotation=70, labelsize=8)
     plt.show()
 def trim_mean_based_clustering(_df, var_name, _k, target_var ="Target", proportiontocut=0.05):
     means_df = (_df.groupby(var_name)[target_var].apply(
@@ -563,6 +563,7 @@ objetos_cluster.pop('genero_participante', None)
     k-means para agrupar la condición primaria de estudio (enfermedad) según 
     la edad mínima promedio de los pacientes y duración promedio del estudio.
 '''
+print("Kmeans")
 kmeans_df = (
     df_training_final.groupby('condicion_primaria_estudio')[['edad_min_participante', 'Target']].mean().reset_index()
 )
@@ -597,9 +598,10 @@ for k, v in dict(
 # ┃ 5. Modelo supervisado   ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 '''
-    Árbol regresor, para estimar una fecha aproximada de conclusión del estudo
+    Árbol regresor, para estimar una fecha aproximada de conclusión del estudio
     para aquellos que no tienen una fecha definida.
 '''
+print("DTree")
 # 5.1 Entrenamiento  ---------------------------------------------------------------------------------------------------
 X = df_training_final.drop(columns='Target')
 y = df_training_final['Target']
@@ -619,28 +621,42 @@ plot_tree(regressor, feature_names=X.columns, filled=True, rounded=True)
 plt.show()
 
 
+
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃ 6. Prueba de hpótesis   ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
 '''
     Idea: 
-        H0 = La duración de un estudio es independiente de la cantidad de patrocinadores
+        H0 = La duración de un estudio es independiente de la edad promedio de los participantes
 '''
-#   PROPUESTA DE CÓDIGO PARA UNA PRUEBA CHI DE INDEPENDENCIA DE MUESTRAS!!!
+# 6.1 Remover outliers -------------------------------------------------------------------------------------------------
+# Habíamos puesto valor de 200 a los nulos de la edad, hay que revertir esa transformación
+variables_contraste = dict(
+    Target= df_training['Target'].dropna(),
+    media_edad_participacion= df_training['media_edad_participacion'].dropna()
+)
+for var in variables_contraste.keys():
+    data = variables_contraste[var]
+    IQR_data = data[(data <= (data.quantile(0.95) if var =='Target' else 90 ))] # valores razonables de duración y edad
+    plt.figure()
+    sns.histplot(IQR_data, kde=True, bins=30)
+    plt.show()
+# 6.2 Prueba de normalidad de las variables ----------------------------------------------------------------------------
+    stat, p = normaltest(IQR_data)
+    print(f" Prueba de normalidad de D'Agostino-Pearson para '{var}': stat={stat:.4f}, p={p:.4f}")
+    alpha = 0.05  # <-- punto crítico
+    if p > alpha:
+        print(f"{var} es normal")
+        variables_contraste[var] = IQR_data
+    else:
+        print(f"{var} no es normal!")
 
-    # Agrupar duración por número de patrocinadores
-#df['num_patrocinadores'] = df['patrocinadores'].apply(lambda x: len(str(x).split(',')) if pd.notnull(x) else 0)
-#df['categoria_duracion'] = pd.cut(df['duracion_dias'], bins=[0, 180, 365, 10000], labels=['corta', 'media', 'larga'])
+# 6.3 Prueba chi-cuadrado ---------------------------------------------------------------------------------------------
+contingencia = pd.crosstab(variables_contraste['Target'],variables_contraste['media_edad_participacion'])
+chi2, p, dof, expected = chi2_contingency(contingencia)
+print(f"Chi² = {chi2:.2f}, p = {p:.4f}")
 
-    # Tabla de contingencia
-#contingencia = pd.crosstab(df['num_patrocinadores'], df['categoria_duracion'])
-
-    # Prueba chi-cuadrado
-#chi2, p, dof, expected = chi2_contingency(contingencia)
-#print(f"Chi² = {chi2:.2f}, p = {p:.4f}")
-
-#if p < 0.05:
-#    print("Rechazamos H0: La duración del estudio depende del número de patrocinadores.")
-#else:
-#    print("No se puede rechazar H0: No hay evidencia de relación.")
+if p < 0.05:
+    print("Rechazamos H0: La duración del estudio depende de la edad de los participantes.")
+else:
+    print("No se puede rechazar H0: No hay evidencia de relación.")
