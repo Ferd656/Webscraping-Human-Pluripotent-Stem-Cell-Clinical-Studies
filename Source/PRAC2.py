@@ -574,6 +574,8 @@ df_training_final = df_training_2[[
 ]].copy()
 objetos_cluster.pop('genero_participante', None)
 
+df_training_final.to_csv('..\\Dataset\\ensayos_PSC_limpio.csv', index=False)
+
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 # ┃ 4. Modelo no supervisado   ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
