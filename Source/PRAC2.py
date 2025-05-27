@@ -11,8 +11,8 @@ import seaborn as sns
 from io import StringIO
 import matplotlib.pyplot as plt
 from scipy.stats import trim_mean
-from numpy.ma.extras import unique
 from sklearn.cluster import KMeans
+from scipy.stats import normaltest
 from sklearn.decomposition import PCA
 from scipy.stats import chi2_contingency
 from sklearn.preprocessing import StandardScaler
@@ -54,8 +54,8 @@ def analisis_exploratorio(datos):
     for i, variable in enumerate(numericas.columns):
         sns.histplot(datos[variable].dropna(), kde=True, bins=30, ax=axes[i])
         axes[i].set_title(f"{variable}")
-        axes[i].set_xlabel(variable)
-        axes[i].set_ylabel("Frecuencia")
+        axes[i].set_xlabel('')
+        axes[i].set_ylabel('')
     for j in range(i + 1, len(axes)):
         fig.delaxes(axes[j])
     plt.show()
@@ -69,9 +69,13 @@ def analisis_exploratorio(datos):
     for i, variable in enumerate(categoricas.columns):
         datos[variable].value_counts(dropna=False).plot(kind='bar', ax=axes[i])
         axes[i].set_title(f"{variable}")
-        axes[i].set_xlabel(variable)
-        axes[i].set_ylabel("Conteo")
-        axes[i].tick_params(axis='x', rotation=70, labelsize=8)
+        axes[i].set_xlabel('')
+        axes[i].set_ylabel('')
+        if variable in ('tipo_celula', 'condicion_primaria_estudio', 'condicion_secundaria_estudio'):
+            axes[i].set_xticklabels('')
+        else:
+            axes[i].set_xticklabels(list(datos[variable].unique()))
+            axes[i].tick_params(axis='x', rotation=45)
         n_distinct = datos[variable].nunique(dropna=False)
         axes[i].text(
             0.95, 0.95,  # Position (relative to axes)
@@ -127,12 +131,23 @@ def see_categorical_vars(_categoricas, _df, _n_cols = 8):
         axes[row, col].set_title(f"{variable}")
         axes[row, col].set_xlabel('')
         axes[row, col].set_ylabel('')
-        axes[row, col].tick_params(axis='x', rotation=70, labelsize=8)
+        '''axes[row, col].tick_params(
+            axis='x',
+            which='both',
+            bottom=False,
+            top=False,
+            labelbottom=False)'''
+        axes[row, col].tick_params(axis='x', rotation=45)
         sns.boxplot(x=variable, y="Target", data=_df, ax=axes[row, col+1])
-        axes[row, col+1].set_title(f"{variable}")
         axes[row, col+1].set_xlabel('')
         axes[row, col+1].set_ylabel('')
-        axes[row, col+1].tick_params(axis='x', rotation=70, labelsize=8)
+        '''axes[row, col+1].tick_params(
+            axis='x',
+            which='both',
+            bottom=False,
+            top=False,
+            labelbottom=False)'''
+        axes[row, col+1].tick_params(axis='x', rotation=45)
     plt.show()
 def trim_mean_based_clustering(_df, var_name, _k, target_var ="Target", proportiontocut=0.05):
     means_df = (_df.groupby(var_name)[target_var].apply(
@@ -471,6 +486,7 @@ see_numerical_vars(
     ],
     df_training
 )
+
 '''
     Tarea 3: Agrupamiento de variables categóricas para valores de baja frecuencia
 '''
@@ -504,6 +520,7 @@ objetos_cluster['genero_participante'] = dict(
             "Male": "All"
         }
     )
+
 # 3.4 Selección de variables explicativas  -----------------------------------------------------------------------------
 ## 3.4.1 Selección preliminar
 df_training_2 = df_training[[
@@ -520,6 +537,7 @@ df_training_2 = df_training[[
 ## 3.4.2 Convertir las variables a numérico
 ### 3.4.2.1 Aplicar bins
 df_training_2 = bin_transform(df_training_2, objetos_cluster)
+see_categorical_vars(df_training_2.select_dtypes(include=['object', 'category', 'bool', 'string']), df_training_2)
 ### 3.4.2.2 Target-based encoding
 df_training_diccionario = target_based_encoding(df_training_2)
 df_training_2 = df_training_diccionario['df']
@@ -563,7 +581,6 @@ objetos_cluster.pop('genero_participante', None)
     k-means para agrupar la condición primaria de estudio (enfermedad) según 
     la edad mínima promedio de los pacientes y duración promedio del estudio.
 '''
-print("Kmeans")
 kmeans_df = (
     df_training_final.groupby('condicion_primaria_estudio')[['edad_min_participante', 'Target']].mean().reset_index()
 )
@@ -598,10 +615,9 @@ for k, v in dict(
 # ┃ 5. Modelo supervisado   ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 '''
-    Árbol regresor, para estimar una fecha aproximada de conclusión del estudio
+    Árbol regresor, para estimar una fecha aproximada de conclusión del estudo
     para aquellos que no tienen una fecha definida.
 '''
-print("DTree")
 # 5.1 Entrenamiento  ---------------------------------------------------------------------------------------------------
 X = df_training_final.drop(columns='Target')
 y = df_training_final['Target']
@@ -619,7 +635,6 @@ plt.figure()
 plt.figure(figsize=(20, 10))
 plot_tree(regressor, feature_names=X.columns, filled=True, rounded=True)
 plt.show()
-
 
 
 # ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -646,10 +661,10 @@ for var in variables_contraste.keys():
     print(f" Prueba de normalidad de D'Agostino-Pearson para '{var}': stat={stat:.4f}, p={p:.4f}")
     alpha = 0.05  # <-- punto crítico
     if p > alpha:
-        print(f"{var} es normal")
+        print(f"✅ {var} es normal")
         variables_contraste[var] = IQR_data
     else:
-        print(f"{var} no es normal!")
+        print(f"❌ {var} no es normal!")
 
 # 6.3 Prueba chi-cuadrado ---------------------------------------------------------------------------------------------
 contingencia = pd.crosstab(variables_contraste['Target'],variables_contraste['media_edad_participacion'])
