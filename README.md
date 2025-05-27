@@ -18,13 +18,14 @@
 📁&nbsp;&nbsp;&nbsp;&nbsp;Source<br>
 &nbsp;├🤖&nbsp;&nbsp;&nbsp;&nbsp;base_de_datos.py  <span style="font-size:10px; color: rgb(66, 135, 245);"><i>(fichero python con funciones especializadas en la gestión de la base de datos)</i></span><br>
 &nbsp;├🤖&nbsp;&nbsp;&nbsp;&nbsp;explorar.py  <span style="font-size:10px; color: rgb(66, 135, 245);"><i>(fichero python que ejecuta un análisis descriptivo sobre los datos)</i></span><br>
-&nbsp;└🤖&nbsp;&nbsp;&nbsp;&nbsp;webscraping.py  <span style="font-size:10px; color: rgb(66, 135, 245);"><i>(fichero python con funciones para webscraping y limpieza de datos)</i></span><br>
+&nbsp;├🤖&nbsp;&nbsp;&nbsp;&nbsp;webscraping.py  <span style="font-size:10px; color: rgb(66, 135, 245);"><i>(fichero python con funciones para webscraping y limpieza de datos)</i></span><br>
+&nbsp;└🤖&nbsp;&nbsp;&nbsp;&nbsp;PRAC2.py  <span style="font-size:10px; color: rgb(66, 135, 245);"><i>(fichero python que ejecuta tareas exhaustivas de análisis y transformación sobre los datos, realiza un entrenamiento/ajuste de modelos supervisado y no supervisado de machine learning y un contraste de hipótesis)</i></span><br>
 </p>
 
 <h2>Funcionamiento del programa:</h2>
 
 <h3>▶️webscraping.py</h3>
-<p>Este fichero contiene el código principal, se encarga de consultar la url objetivo y realiza las tareas necesarias de <i>webscraping</i> para obtener de esta la data necesaria. A continuación se describe las funciones que este fichero contiene:</p>
+<p>Este fichero contiene la primera parte del código principal, se encarga de consultar la url objetivo y realiza las tareas necesarias de <i>webscraping</i> para obtener de esta la data necesaria. A continuación se describe las funciones que este fichero contiene:</p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;<b>• paso1_ordenar_elementos</b><br>
 <div style="margin-left: 40px;">Esta función recibe como parámetro un objeto <i>webdriver</i> de la librería <i>Selenium</i>. Está específicamente diseñada para realizar un ordenamiento previo, de forma descendente, de los estudios publicados en la página respecto a su fecha de inicio. Para ello simula una acción de <i>click</i> a un elemento html específico el cual desencadena la función <i>javascript</i> que realiza dicha tarea.<br><br>
@@ -37,6 +38,11 @@ Esta Función devuelve el objeto de lista con las url recopiladas.
 </div><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<b>• extraer_detalles</b><br>
 <div style="margin-left: 40px;">Esta función recibe como parámetro una url y sirve como auxiliar de la función paso3_almacenar_data. Se encarga de extraer y transformar la data de un estudio clínico.<br><br>
+Esta Función devuelve, en un objeto de diccionario, la data de interés ubicada en la url recibida como parámetro.
+</div><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>• ictrp_url_info</b><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetros la url de la ficha del estudio clínico en ictrp (International Clinical Trials Registry Platform), un objeto 'Selenium chrome options', y como parámetro opcionale: un número de segundos de timeout de respuesta.<br><br>
+Se encarga de recopilar la información pertinente al estudio clínico que se encuentra almacenada en su ficha de la ictrp.<br><br>
 Esta Función devuelve, en un objeto de diccionario, la data de interés ubicada en la url recibida como parámetro.
 </div><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<b>• paso3_almacenar_data</b><br>
@@ -63,12 +69,34 @@ Esta es una función <i>void</i>, es decir, que no devuelve ningún valor.
 Esta es una función <i>void</i>, es decir, que no devuelve ningún valor. 
 </div><br>
 
+&nbsp;&nbsp;&nbsp;&nbsp;<b>• schema_to_pandas</b><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetros un objeto de conexión SQLite, y como parámetro opcionale: una cadena de texto referente a una de las estructuras(tablas) de la base de datos.<br>Devuelve un diccionario con los nombres de las columnas de la tabla recibida como parámetro como llaves, y los tipos de dato de cada una, en formato Pandas, como valores.
+</div><br>
+
 <h3>▶️explorar.py</h3>
 <p>Este fichero no contiene funciones. Está diseñado para que, al ser ejecutado, devuelva un breve resumen descriptivo de los datos almacenados en "ensayos_PSC", haciendo uso de las librerías <i>Pandas</i> y <i>SQLite</i>.</p>
 
+<h3>▶️PRAC2.py</h3>
+<p>Este fichero contiene la segunda parte del código principal, se encarga de describir los datos, transformarlos, y aplicar sobre ellos técnicas de analítica avanzada. A continuación se describe las funciones que este fichero contiene:</p>
+
+&nbsp;&nbsp;&nbsp;&nbsp;<b>• analisis_exploratorio</b><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetro un objeto <i>dataframe</i> de la librería <i>pandas</i>. Imprime en pantalla una serie de gráficos con estadística descriptiva relevante sobre los datos.<br><br>
+Esta es una función <i>void</i>, es decir, que no devuelve ningún valor.
+</div><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>• see_numerical_vars</b><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetros un objeto <i>data.series</i> y un objeto <i>dataframe</i> de la librería <i>pandas</i>, y como parámetro opcional: un valor numérico referente al número de columnas para la cuadrícula de gráficos.
+Imprime en pantalla una cuadrícula de gráficos con información relevante sobre las variables numéricas en función de una variable objetivo(<i>Target</i>).<br><br>
+Esta Función devuelve el objeto de lista con las url recopiladas.
+</div><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>• see_categorical_vars</b><br>
+<div style="margin-left: 40px;">Esta función recibe como parámetros un objeto <i>data.series</i> y un objeto <i>dataframe</i> de la librería <i>pandas</i>, y como parámetro opcional: un valor numérico referente al número de columnas para la cuadrícula de gráficos.
+Imprime en pantalla una cuadrícula de gráficos con información relevante sobre las variables categóricas en función de una variable objetivo(<i>Target</i>).<br><br>
+Esta Función devuelve el objeto de lista con las url recopiladas.
+</div><br>
+
 <h3>▶️Modo de uso del programa</h3>
 
-Para ejecutar el programa solamente se debe correr el <i>script</i> llamado webscraping.py, ya sea mediante el editor de código de preferencia o mediante el comando `python webscraping.py`.
+Para ejecutar el programa, es necesario primero correr el <i>script</i> llamado webscraping.py, y en una segunda instancia correr el <i>script</i> llamado PRAC2.py, ya sea mediante el editor de código de preferencia o mediante los comandos `python webscraping.py` y `python PRAC2.py`.
 
 <h2>Resultados:</h2>
 
